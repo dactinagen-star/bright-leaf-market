@@ -11,6 +11,14 @@ import { useEffect, type ReactNode } from "react";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
+import "@fontsource/nunito/400.css";
+import "@fontsource/nunito/600.css";
+import "@fontsource/nunito/700.css";
+import "@fontsource/nunito/800.css";
+import { CartProvider } from "@/lib/cart-store";
+import { AppHeader } from "@/components/AppHeader";
+import { Toaster } from "@/components/ui/sonner";
+import { getTelegram } from "@/lib/telegram";
 
 function NotFoundComponent() {
   return (
@@ -77,20 +85,22 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Lovable App" },
-      { name: "description", content: "Lovable Generated Project" },
-      { name: "author", content: "Lovable" },
-      { property: "og:title", content: "Lovable App" },
-      { property: "og:description", content: "Lovable Generated Project" },
+      { title: "EcoEnergy Marketplace — екологічні товари України" },
+      { name: "description", content: "Маркетплейс екотоварів та крафтових виробів від українських майстрів. Купуй напряму у виробника через Telegram." },
+      { name: "author", content: "EcoEnergy" },
+      { property: "og:title", content: "EcoEnergy Marketplace" },
+      { property: "og:description", content: "Маркетплейс екотоварів від українських майстрів." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
-      { name: "twitter:site", content: "@Lovable" },
     ],
     links: [
       {
         rel: "stylesheet",
         href: appCss,
       },
+    ],
+    scripts: [
+      { src: "https://telegram.org/js/telegram-web-app.js", async: true },
     ],
   }),
   shellComponent: RootShell,
@@ -101,7 +111,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 
 function RootShell({ children }: { children: ReactNode }) {
   return (
-    <html lang="en">
+    <html lang="uk">
       <head>
         <HeadContent />
       </head>
@@ -115,11 +125,23 @@ function RootShell({ children }: { children: ReactNode }) {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
+  useEffect(() => {
+    const tg = getTelegram();
+    tg?.ready?.();
+    tg?.expand?.();
+  }, []);
 
   return (
     <QueryClientProvider client={queryClient}>
-      {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
-      <Outlet />
+      <CartProvider>
+        <div className="min-h-screen bg-background text-foreground">
+          <AppHeader />
+          <main className="mx-auto max-w-3xl px-4 pb-24 pt-4">
+            <Outlet />
+          </main>
+        </div>
+        <Toaster />
+      </CartProvider>
     </QueryClientProvider>
   );
 }
