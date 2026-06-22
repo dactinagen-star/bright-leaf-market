@@ -85,13 +85,13 @@ function CatalogPage() {
   });
 
   const regionsById = useMemo(() => {
-    const m: Record<string, (typeof regionsQuery.data)[number]> = {};
+    const m: Record<string, NonNullable<typeof regionsQuery.data>[number]> = {};
     for (const r of regionsQuery.data ?? []) m[r.id] = r;
     return m;
   }, [regionsQuery.data]);
 
   const districtsById = useMemo(() => {
-    const m: Record<string, (typeof districtsQuery.data)[number]> = {};
+    const m: Record<string, NonNullable<typeof districtsQuery.data>[number]> = {};
     for (const d of districtsQuery.data ?? []) m[d.id] = d;
     return m;
   }, [districtsQuery.data]);
