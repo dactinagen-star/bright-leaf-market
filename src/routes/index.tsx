@@ -4,6 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { AdsBanner } from "@/components/AdsBanner";
 import { Filters, type FilterState } from "@/components/Filters";
 import { ProductCard } from "@/components/ProductCard";
+import { SellerCard } from "@/components/SellerCard";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   fetchCatalog,
@@ -45,7 +46,7 @@ const INITIAL: FilterState = {
   subcategoryId: null,
   regionId: null,
   districtId: null,
-  sort: "newest",
+  sort: "by_seller",
 };
 
 function CatalogPage() {
@@ -98,6 +99,22 @@ function CatalogPage() {
 
   const loading = catalogQuery.isLoading || !queryEnabled;
 
+  const grouped = useMemo(() => {
+    if (filters.sort !== "by_seller") return null;
+    const map = new Map<string, typeof items>();
+    for (const it of items) {
+      const arr = map.get(it.wallet_address) ?? [];
+      arr.push(it);
+      map.set(it.wallet_address, arr);
+    }
+    return Array.from(map.entries()).map(([wallet, list]) => ({
+      wallet,
+      items: [...list].sort(
+        (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
+      ),
+    }));
+  }, [items, filters.sort]);
+
   return (
     <div className="space-y-5">
       <AdsBanner />
@@ -132,7 +149,19 @@ function CatalogPage() {
           </div>
         )}
 
-        {!loading &&
+        {!loading && grouped &&
+          grouped.map((g) => (
+            <SellerCard
+              key={g.wallet}
+              wallet={g.wallet}
+              seller={sellersQuery.data?.[g.wallet]}
+              items={g.items}
+              regionsById={regionsById}
+              districtsById={districtsById}
+            />
+          ))}
+
+        {!loading && !grouped &&
           items.map((item) => (
             <ProductCard
               key={item.id}
