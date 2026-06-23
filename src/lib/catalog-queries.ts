@@ -14,7 +14,7 @@ export type CatalogFilters = {
   subcategoryId?: string | null;
   regionId?: string | null;
   districtId?: string | null;
-  sort?: "by_seller" | "newest" | "price_asc" | "price_desc";
+  sort?: "newest" | "price_asc" | "price_desc";
 };
 
 export async function fetchCatalog(filters: CatalogFilters): Promise<CatalogItem[]> {
@@ -54,12 +54,8 @@ export async function fetchCatalog(filters: CatalogFilters): Promise<CatalogItem
     case "price_desc":
       q = q.order("price_uah", { ascending: false, nullsFirst: false });
       break;
-    case "newest":
-      q = q.order("created_at", { ascending: false });
-      break;
     default:
-      // by_seller: групуємо на клієнті, але всередині сортуємо за новизною
-      q = q.order("wallet_address", { ascending: true }).order("created_at", { ascending: false });
+      q = q.order("created_at", { ascending: false });
   }
 
   const { data, error } = await q.limit(200);
