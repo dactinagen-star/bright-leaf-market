@@ -10,7 +10,7 @@ export type FilterState = {
   subcategoryId: string | null;
   regionId: string | null;
   districtId: string | null;
-  sort: "newest" | "price_asc" | "price_desc";
+  sort: "by_seller" | "newest" | "price_asc" | "price_desc";
 };
 
 const ALL = "__all__";
@@ -112,6 +112,7 @@ export function Filters({ value, onChange, categories, subcategories, regions, d
         <Select value={value.sort} onValueChange={(v) => onChange({ ...value, sort: v as FilterState["sort"] })}>
           <SelectTrigger className="w-[180px]"><SelectValue /></SelectTrigger>
           <SelectContent>
+            <SelectItem value="by_seller">За продавцями</SelectItem>
             <SelectItem value="newest">Нові спочатку</SelectItem>
             <SelectItem value="price_asc">Ціна: ↑</SelectItem>
             <SelectItem value="price_desc">Ціна: ↓</SelectItem>
@@ -128,7 +129,7 @@ export function Filters({ value, onChange, categories, subcategories, regions, d
                 subcategoryId: null,
                 regionId: null,
                 districtId: null,
-                sort: "newest",
+                sort: "by_seller",
               })
             }
           >
