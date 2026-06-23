@@ -18,7 +18,27 @@ export type CatalogFilters = {
 };
 
 export async function fetchCatalog(filters: CatalogFilters): Promise<CatalogItem[]> {
-  let q = supabase.from("catalog_items").select("*").eq("active", true);
+  // Крок 1: беремо wallet_address продавців з прив'язаним Telegram.
+  // Без Telegram покупець не зможе зв'язатись із продавцем — таких ховаємо.
+  const { data: linkedWallets, error: walletsError } = await supabase
+    .from("telegram_links")
+    .select("wallet_address");
+
+  if (walletsError) throw walletsError;
+
+  const verifiedWallets = (linkedWallets ?? []).map(
+    (r: { wallet_address: string }) => r.wallet_address,
+  );
+
+  if (!verifiedWallets.length) return [];
+
+  // Крок 2: каталог тільки серед верифікованих гаманців
+  let q = supabase
+    .from("catalog_items")
+    .select("*")
+    .eq("active", true)
+    .in("wallet_address", verifiedWallets);
+
   if (filters.search && filters.search.length >= 3) {
     q = q.ilike("name", `${filters.search}%`);
   }
